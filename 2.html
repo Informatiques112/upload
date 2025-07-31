@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Messages pour nous deux 💌</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(120deg, #ffe3ec, #ffc2d1);
+      margin: 0;
+      padding: 0;
+      color: #4d1c27;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff0f5;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #d6336c;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #d6336c;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #b52d59;
+    }
+    .messages {
+      margin-top: 30px;
+    }
+    .message {
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .message strong {
+      color: #b52d59;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💌 Messages d'amour</h1>
+    <form id="messageForm">
+      <input type="text" id="from" placeholder="Ton prénom 💖" required />
+      <input type="text" id="to" placeholder="Pour qui ? 💌" required />
+      <textarea id="message" placeholder="Ton message doux..." rows="4" required></textarea>
+      <button type="submit">Envoyer le message 💘</button>
+    </form>
+
+    <div class="messages" id="messagesList">
+      <h2>📜 Nos mots tendres</h2>
+      <!-- Les messages vont s'afficher ici -->
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypi8ZYqYoELN-NeMTHGeAmGFrnOfpg8Oa85CmDrT8b6A5UyBaa4fbEl0o8sHJpKSyl/exec";
+
+    const form = document.getElementById("messageForm");
+    const messagesList = document.getElementById("messagesList");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const from = document.getElementById("from").value;
+      const to = document.getElementById("to").value;
+      const message = document.getElementById("message").value;
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ from, to, message }),
+        headers: { "Content-Type": "application/json" },
+      })
+      .then(response => response.text())
+      .then(() => {
+        form.reset();
+        loadMessages();
+      })
+      .catch(error => alert("Erreur d'envoi : " + error.message));
+    });
+
+    function loadMessages() {
+      fetch(SCRIPT_URL)
+        .then(res => res.json())
+        .then(data => {
+          messagesList.innerHTML = "<h2>📜 Nos mots tendres</h2>";
+          data.reverse().forEach(msg => {
+            const div = document.createElement("div");
+            div.className = "message";
+            div.innerHTML = `<strong>${msg.from}</strong> à <strong>${msg.to}</strong><br><em>${msg.message}</em>`;
+            messagesList.appendChild(div);
+          });
+        });
+    }
+
+    loadMessages();
+  </script>
+</body>
+</html>
