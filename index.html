@@ -2,142 +2,187 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Messagerie d'Amour 💌</title>
+  <title>💖 Messagerie privée</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #ffd6e8, #fff0f5);
       margin: 0;
       padding: 0;
-      color: #444;
+      background: linear-gradient(to right, #ffe6eb, #ffd1e3);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
 
     header {
-      background-color: #ff6f91;
+      background-color: #e91e63;
       color: white;
-      padding: 20px;
+      padding: 1rem;
       text-align: center;
-      font-size: 1.8em;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      font-size: 1.4rem;
     }
 
-    main {
-      max-width: 600px;
-      margin: 30px auto;
-      background-color: white;
+    #chat-container {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bubble {
+      max-width: 60%;
+      padding: 0.8rem;
+      margin: 0.3rem;
       border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      padding: 20px;
-    }
-
-    .message {
-      margin-bottom: 15px;
-      padding: 10px;
-      border-radius: 10px;
+      position: relative;
+      word-wrap: break-word;
     }
 
     .from-me {
-      background-color: #ffe3e3;
+      align-self: flex-end;
+      background-color: #dcf8c6;
+      color: #333;
+      border-bottom-right-radius: 0;
+    }
+
+    .from-you {
+      align-self: flex-start;
+      background-color: #fff;
+      color: #333;
+      border-bottom-left-radius: 0;
+    }
+
+    .timestamp {
+      font-size: 0.7rem;
+      color: #777;
+      margin-top: 0.3rem;
       text-align: right;
     }
 
-    .from-other {
-      background-color: #e1f0ff;
-      text-align: left;
-    }
-
-    form {
+    footer {
       display: flex;
-      margin-top: 20px;
+      padding: 0.8rem;
+      background-color: #fff;
+      border-top: 1px solid #ccc;
     }
 
-    input[type="text"] {
+    input, textarea, button {
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    input, textarea {
       flex: 1;
-      padding: 10px;
+      padding: 0.6rem;
+      margin-right: 0.5rem;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1em;
+      border-radius: 10px;
+    }
+
+    #from, #to {
+      max-width: 100px;
     }
 
     button {
-      padding: 10px 20px;
-      background-color: #ff6f91;
+      padding: 0.6rem 1rem;
+      background-color: #e91e63;
       color: white;
       border: none;
-      border-radius: 8px;
-      margin-left: 10px;
+      border-radius: 10px;
       cursor: pointer;
     }
 
     button:hover {
-      background-color: #ff4e78;
+      background-color: #d81b60;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
     }
   </style>
 </head>
 <body>
-  <header>💬 Messagerie d'Amour</header>
 
-  <main>
-    <div id="messages"></div>
+  <header>💌 Messagerie d'amour</header>
 
-    <form id="form">
-      <input type="text" id="message" placeholder="Écris un message tendre..." autocomplete="off" />
-      <button type="submit">Envoyer</button>
-    </form>
-  </main>
+  <div id="chat-container"></div>
+
+  <footer>
+    <div style="flex:1">
+      <div class="input-group">
+        <input type="text" id="from" placeholder="Moi" />
+        <input type="text" id="to" placeholder="À" />
+      </div>
+      <div class="input-group">
+        <input type="text" id="message" placeholder="Écris ton message..." />
+        <button onclick="sendMessage()">Envoyer</button>
+      </div>
+      <p id="status" style="margin: 0.3rem 0 0 0; font-size: 0.8rem;"></p>
+    </div>
+  </footer>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQuNG1E7y9EV-C0d7jzvZOSH0IDtMGmsIykTi9nx74ju5qLVMVXeNxE0ZW_HcylEr71Q/exec";
-    const fromUser = "Moi 💌";
-    const toUser = "Elle ❤️";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwape8OEvkBmHQRK0wGi87B7ScklmU-U9JMG5PIIyIsvjBq3db9tFFZN4e7PUKrlMQm/exec";
 
-    const form = document.getElementById("form");
-    const messageInput = document.getElementById("message");
-    const messagesDiv = document.getElementById("messages");
+    function sendMessage() {
+      const from = document.getElementById("from").value.trim();
+      const to = document.getElementById("to").value.trim();
+      const message = document.getElementById("message").value.trim();
 
-    async function loadMessages() {
-      try {
-        const res = await fetch(SCRIPT_URL);
-        const data = await res.json();
-        messagesDiv.innerHTML = "";
-        data.reverse().forEach(msg => {
-          const div = document.createElement("div");
-          div.classList.add("message");
-          div.classList.add(msg.from === fromUser ? "from-me" : "from-other");
-          div.textContent = `${msg.from}: ${msg.message}`;
-          messagesDiv.appendChild(div);
-        });
-      } catch (err) {
-        console.error("Erreur de chargement :", err);
+      if (!from || !to || !message) {
+        alert("Tous les champs sont requis !");
+        return;
       }
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ from, to, message }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((res) => res.text())
+      .then(() => {
+        document.getElementById("status").innerText = "✅ Message envoyé !";
+        document.getElementById("message").value = "";
+        loadMessages();
+      })
+      .catch(() => {
+        document.getElementById("status").innerText = "❌ Erreur d'envoi.";
+      });
     }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const message = messageInput.value.trim();
-      if (!message) return;
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            from: fromUser,
-            to: toUser,
-            message: message,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        messageInput.value = "";
-        loadMessages();
-      } catch (err) {
-        console.error("Erreur d'envoi :", err);
-        alert("Erreur d'envoi : " + err.message);
-      }
-    });
+    function loadMessages() {
+      fetch(SCRIPT_URL)
+        .then((res) => res.json())
+        .then((data) => {
+          const container = document.getElementById("chat-container");
+          container.innerHTML = "";
+          const currentUser = document.getElementById("from").value.trim();
 
+          data.reverse().forEach(msg => {
+            const bubble = document.createElement("div");
+            const fromMe = (msg.from === currentUser);
+            bubble.className = "bubble " + (fromMe ? "from-me" : "from-you");
+            bubble.innerHTML = `
+              <strong>${msg.from}</strong> → ${msg.to}<br>
+              ${msg.message}
+              <div class="timestamp">${new Date(msg.date).toLocaleString()}</div>
+            `;
+            container.appendChild(bubble);
+          });
+
+          container.scrollTop = container.scrollHeight;
+        });
+    }
+
+    // Recharger les messages toutes les 5 secondes
+    setInterval(loadMessages, 5000);
     loadMessages();
-    setInterval(loadMessages, 5000); // recharge toutes les 5 secondes
   </script>
+
 </body>
 </html>
