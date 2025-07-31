@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>💖 Notre Messagerie Secrète</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ffe6eb, #fff);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #d6336c;
+      margin-bottom: 10px;
+    }
+
+    #chat {
+      width: 100%;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #messages {
+      padding: 20px;
+      height: 400px;
+      overflow-y: auto;
+      background-color: #fff8f9;
+    }
+
+    .msg {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 75%;
+      word-wrap: break-word;
+      position: relative;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .left {
+      background-color: #f1d1dc;
+      align-self: flex-start;
+    }
+
+    .right {
+      background-color: #ffdce5;
+      align-self: flex-end;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #formulaire {
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      background-color: #fff;
+    }
+
+    input, textarea {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #ff5d8f;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #e04c7c;
+    }
+  </style>
+</head>
+<body>
+  <h2>💌 Messagerie privée</h2>
+
+  <div id="chat">
+    <div id="messages">Chargement...</div>
+
+    <div id="formulaire">
+      <input id="nom" placeholder="Ton prénom (ex : moi)" />
+      <input id="destinataire" placeholder="Son prénom (ex : elle)" />
+      <textarea id="message" placeholder="Ton message d'amour..."></textarea>
+      <button onclick="envoyerMessage()">💬 Envoyer</button>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzhBMHzjtnI4PIcbfTx6DZtgSRKnKmOaKQvkbtk00ShD7_GxNHMx5srBo424bcND4DMog/exec'; // remplace par ton URL
+
+    function getElement(id) {
+      return document.getElementById(id);
+    }
+
+    async function chargerMessages() {
+      const nom = getElement("nom").value.trim();
+      const destinataire = getElement("destinataire").value.trim();
+      if (!nom || !destinataire) return;
+
+      const response = await fetch(`${SCRIPT_URL}?action=recupererMessages&nom1=${nom}&nom2=${destinataire}`);
+      const data = await response.json();
+
+      const container = getElement("messages");
+      container.innerHTML = "";
+      data.forEach(row => {
+        const div = document.createElement("div");
+        div.className = "msg " + (row[1] === nom ? "right" : "left");
+        div.innerText = `${row[1]} : ${row[3]}`;
+        container.appendChild(div);
+      });
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function envoyerMessage() {
+      const nom = getElement("nom").value.trim();
+      const destinataire = getElement("destinataire").value.trim();
+      const message = getElement("message").value.trim();
+      if (!nom || !destinataire || !message) return;
+
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: new URLSearchParams({ nom, destinataire, message })
+      });
+
+      getElement("message").value = '';
+      await chargerMessages();
+    }
+
+    setInterval(chargerMessages, 3000);
+  </script>
+</body>
+</html>
