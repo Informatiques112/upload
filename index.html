@@ -2,155 +2,117 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>💖 Notre Messagerie Secrète</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Messages pour nous deux 💌</title>
   <style>
     body {
-      margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #ffe6eb, #fff);
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
+      background: linear-gradient(120deg, #ffe3ec, #ffc2d1);
+      margin: 0;
+      padding: 0;
+      color: #4d1c27;
     }
-
-    h2 {
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff0f5;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
       color: #d6336c;
-      margin-bottom: 10px;
     }
-
-    #chat {
+    input, textarea, button {
       width: 100%;
-      max-width: 500px;
-      background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
     }
-
-    #messages {
-      padding: 20px;
-      height: 400px;
-      overflow-y: auto;
-      background-color: #fff8f9;
-    }
-
-    .msg {
-      margin: 10px 0;
-      padding: 10px 15px;
-      border-radius: 20px;
-      max-width: 75%;
-      word-wrap: break-word;
-      position: relative;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .left {
-      background-color: #f1d1dc;
-      align-self: flex-start;
-    }
-
-    .right {
-      background-color: #ffdce5;
-      align-self: flex-end;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    #formulaire {
-      display: flex;
-      flex-direction: column;
-      padding: 15px;
-      background-color: #fff;
-    }
-
-    input, textarea {
-      margin-bottom: 10px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      font-size: 14px;
-    }
-
     button {
-      background-color: #ff5d8f;
+      background-color: #d6336c;
       color: white;
       border: none;
-      padding: 12px;
-      border-radius: 10px;
       cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
+      transition: background-color 0.3s ease;
     }
-
     button:hover {
-      background-color: #e04c7c;
+      background-color: #b52d59;
+    }
+    .messages {
+      margin-top: 30px;
+    }
+    .message {
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .message strong {
+      color: #b52d59;
     }
   </style>
 </head>
 <body>
-  <h2>💌 Messagerie privée</h2>
+  <div class="container">
+    <h1>💌 Messages d'amour</h1>
+    <form id="messageForm">
+      <input type="text" id="from" placeholder="Ton prénom 💖" required />
+      <input type="text" id="to" placeholder="Pour qui ? 💌" required />
+      <textarea id="message" placeholder="Ton message doux..." rows="4" required></textarea>
+      <button type="submit">Envoyer le message 💘</button>
+    </form>
 
-  <div id="chat">
-    <div id="messages">Chargement...</div>
-
-    <div id="formulaire">
-      <input id="nom" placeholder="Ton prénom (ex : moi)" />
-      <input id="destinataire" placeholder="Son prénom (ex : elle)" />
-      <textarea id="message" placeholder="Ton message d'amour..."></textarea>
-      <button onclick="envoyerMessage()">💬 Envoyer</button>
+    <div class="messages" id="messagesList">
+      <h2>📜 Nos mots tendres</h2>
+      <!-- Les messages vont s'afficher ici -->
     </div>
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzhBMHzjtnI4PIcbfTx6DZtgSRKnKmOaKQvkbtk00ShD7_GxNHMx5srBo424bcND4DMog/exec'; // remplace par ton URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypi8ZYqYoELN-NeMTHGeAmGFrnOfpg8Oa85CmDrT8b6A5UyBaa4fbEl0o8sHJpKSyl/exec";
 
-    function getElement(id) {
-      return document.getElementById(id);
+    const form = document.getElementById("messageForm");
+    const messagesList = document.getElementById("messagesList");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const from = document.getElementById("from").value;
+      const to = document.getElementById("to").value;
+      const message = document.getElementById("message").value;
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ from, to, message }),
+        headers: { "Content-Type": "application/json" },
+      })
+      .then(response => response.text())
+      .then(() => {
+        form.reset();
+        loadMessages();
+      })
+      .catch(error => alert("Erreur d'envoi : " + error.message));
+    });
+
+    function loadMessages() {
+      fetch(SCRIPT_URL)
+        .then(res => res.json())
+        .then(data => {
+          messagesList.innerHTML = "<h2>📜 Nos mots tendres</h2>";
+          data.reverse().forEach(msg => {
+            const div = document.createElement("div");
+            div.className = "message";
+            div.innerHTML = `<strong>${msg.from}</strong> à <strong>${msg.to}</strong><br><em>${msg.message}</em>`;
+            messagesList.appendChild(div);
+          });
+        });
     }
 
-    async function chargerMessages() {
-      const nom = getElement("nom").value.trim();
-      const destinataire = getElement("destinataire").value.trim();
-      if (!nom || !destinataire) return;
-
-      const response = await fetch(`${SCRIPT_URL}?action=recupererMessages&nom1=${nom}&nom2=${destinataire}`);
-      const data = await response.json();
-
-      const container = getElement("messages");
-      container.innerHTML = "";
-      data.forEach(row => {
-        const div = document.createElement("div");
-        div.className = "msg " + (row[1] === nom ? "right" : "left");
-        div.innerText = `${row[1]} : ${row[3]}`;
-        container.appendChild(div);
-      });
-      container.scrollTop = container.scrollHeight;
-    }
-
-    async function envoyerMessage() {
-      const nom = getElement("nom").value.trim();
-      const destinataire = getElement("destinataire").value.trim();
-      const message = getElement("message").value.trim();
-      if (!nom || !destinataire || !message) return;
-
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: new URLSearchParams({ nom, destinataire, message })
-      });
-
-      getElement("message").value = '';
-      await chargerMessages();
-    }
-
-    setInterval(chargerMessages, 3000);
+    loadMessages();
   </script>
 </body>
 </html>
